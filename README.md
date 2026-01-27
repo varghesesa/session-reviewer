@@ -1,0 +1,164 @@
+# Session Reviewer
+
+A Claude Code skill that exports conversations to Markdown and HTML formats for sharing, archiving, or review.
+
+## Features
+
+- **Dual output**: Generates both Markdown and HTML from a single JSON data source
+- **Self-contained HTML**: Works offline with `file://` protocol (no external dependencies)
+- **Sidebar navigation**: HTML includes searchable message list with filters
+- **Tool visibility**: Shows all tool uses with inputs and outputs
+- **Collapsible sections**: Tool outputs can be expanded/collapsed in HTML view
+
+## Installation
+
+Copy the skill files to your Claude Code skills directory:
+
+```bash
+mkdir -p ~/.claude/skills/share-session
+cp SKILL.md export.py template.html ~/.claude/skills/share-session/
+```
+
+Or run:
+
+```bash
+./install.sh
+```
+
+## Usage
+
+After installation, restart Claude Code and run:
+
+```bash
+# Export to current directory
+/share-session
+
+# Export to custom path
+/share-session ./exports/my-session
+```
+
+This creates three files:
+- `{name}.json` - Session data (intermediate format)
+- `{name}.md` - Markdown export
+- `{name}.html` - HTML export with sidebar UI
+
+## How It Works
+
+1. **Reconstruction**: Claude reconstructs the conversation from memory into a structured JSON format
+2. **Export**: The `export.py` script converts the JSON to both Markdown and HTML
+3. **Template**: HTML uses `template.html` with embedded CSS/JS for the sidebar UI
+
+```
+┌─────────────────┐     ┌─────────────┐     ┌──────────────┐
+│ Claude recalls  │ ──▶ │ session.json│ ──▶ │ session.md   │
+│ conversation    │     │ (shared)    │     │ session.html │
+└─────────────────┘     └─────────────┘     └──────────────┘
+```
+
+## File Structure
+
+```
+session-reviewer/
+├── README.md           # This file
+├── PLAN.md             # Original planning document
+├── SKILL.md            # Skill instructions for Claude
+├── export.py           # Python script to generate outputs
+├── template.html       # HTML template with sidebar UI
+├── session-data.json   # Example session data
+├── session-export.md   # Example Markdown output
+└── session-export.html # Example HTML output
+```
+
+Installed skill location:
+```
+~/.claude/skills/share-session/
+├── SKILL.md
+├── export.py
+└── template.html
+```
+
+## Data Format
+
+The JSON structure used by both exports:
+
+```json
+{
+  "metadata": {
+    "exportedAt": "2025-01-27T15:00:00",
+    "workingDirectory": "/path/to/project"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "User message text"
+    },
+    {
+      "role": "assistant",
+      "content": "Simple text response"
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {"type": "text", "text": "Response with tools"},
+        {
+          "type": "tool_use",
+          "name": "Bash",
+          "input": {"command": "ls -la"},
+          "output": "file1.txt\nfile2.txt"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Manual Export
+
+You can also run the export script directly:
+
+```bash
+# Generate from existing JSON
+python3 export.py session-data.json output-name
+
+# This creates:
+# - output-name.md
+# - output-name.html
+```
+
+## HTML Features
+
+The HTML export includes:
+
+- **Sidebar**: Lists all messages with role icons and preview text
+- **Search**: Filter messages by text content
+- **Filters**: Show All, User only, Assistant only, or messages with Tools
+- **Collapsible tools**: Click tool headers to expand/collapse output
+- **Dark theme**: Easy on the eyes
+- **Responsive**: Works on mobile devices
+
+## Limitations
+
+- **Context reconstruction**: Long conversations may have incomplete early history if they exceed Claude's context window
+- **No images**: Image content is noted but not embedded
+- **Manual trigger**: Skill must be invoked explicitly (`/share-session`)
+
+## Background
+
+This skill was inspired by the `/share` command in [pi-mono/coding-agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent), which exports sessions to HTML and uploads to GitHub Gist.
+
+The key differences:
+- This skill works with Claude Code (different product)
+- Uses "context reconstruction" approach (Claude recalls the conversation)
+- Outputs both Markdown and HTML
+- No gist upload (yet) - files are local
+
+## Future Enhancements
+
+- [ ] `--gist` flag to upload HTML to GitHub Gist
+- [ ] `--redact` flag to prompt for sensitive content review
+- [ ] `--since N` flag to export only last N messages
+- [ ] Light theme option for HTML
+
+## License
+
+MIT

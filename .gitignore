@@ -1,0 +1,11 @@
+# Example/test exports (not part of the skill)
+this-session.*
+session-export.*
+session-data.json
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
