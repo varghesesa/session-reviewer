@@ -1,7 +1,5 @@
-# Example/test exports (not part of the skill)
-this-session.*
-session-export.*
-session-data.json
+# Example exports (not part of the skill)
+exports/
 
 # Python
 __pycache__/
