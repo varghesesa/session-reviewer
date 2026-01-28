@@ -159,6 +159,13 @@ The key differences:
 - [ ] `--since N` flag to export only last N messages
 - [ ] Light theme option for HTML
 
+## Acknowledgments
+
+This project builds on the work of others:
+
+- **[Ben Tossell](https://github.com/bentossell/share-session)** - For demonstrating how to extract content from other repos, like the /share command, via this [YouTube video](https://www.youtube.com/live/5YBjll9XJlw?si=uEhRuA4GtrZTiSOA) (around 34:00)
+- **[Mario Zechner (badlogic)](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)** - The original `/share` command implementation in pi-mono/coding-agent that inspired this skill's approach to session export
+
 ## License
 
 MIT
