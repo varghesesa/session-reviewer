@@ -30,29 +30,50 @@ Or run:
 After installation, restart Claude Code and run:
 
 ```bash
-# Export to current directory
+# Export with automatic naming (timestamp-based)
 /share-session
 
-# Export to custom path
-/share-session ./exports/my-session
+# Export with custom session name
+/share-session auth-refactor
+
+# Export to custom path (bypasses default location)
+/share-session ./custom/path
 ```
 
-This creates three files:
-- `{name}.json` - Session data (intermediate format)
-- `{name}.md` - Markdown export
-- `{name}.html` - HTML export with sidebar UI
+### Output Location
+
+The skill automatically determines where to save sessions:
+
+1. If `docs/` directory exists → `docs/sessions/<name>/`
+2. Otherwise → `sessions/<name>/`
+
+Each session gets its own subdirectory containing:
+- `session.json` - Session data (intermediate format)
+- `session.md` - Markdown export
+- `session.html` - HTML export with sidebar UI
+
+Example output structure:
+```
+docs/sessions/2024-01-29-1430/
+  session.json
+  session.md
+  session.html
+```
 
 ## How It Works
 
-1. **Reconstruction**: Claude reconstructs the conversation from memory into a structured JSON format
-2. **Export**: The `export.py` script converts the JSON to both Markdown and HTML
-3. **Template**: HTML uses `template.html` with embedded CSS/JS for the sidebar UI
+1. **Location**: Checks for `docs/` directory to determine output path
+2. **Reconstruction**: Claude reconstructs the conversation from memory into structured JSON
+3. **Export**: The `export.py` script converts the JSON to both Markdown and HTML
+4. **Organization**: Each session gets its own subdirectory with all three files
 
 ```
-┌─────────────────┐     ┌─────────────┐     ┌──────────────┐
-│ Claude recalls  │ ──▶ │ session.json│ ──▶ │ session.md   │
-│ conversation    │     │ (shared)    │     │ session.html │
-└─────────────────┘     └─────────────┘     └──────────────┘
+┌─────────────────┐     ┌─────────────────────────────────┐
+│ Claude recalls  │ ──▶ │ sessions/2024-01-29-1430/       │
+│ conversation    │     │   session.json                  │
+│                 │     │   session.md                    │
+│                 │     │   session.html                  │
+└─────────────────┘     └─────────────────────────────────┘
 ```
 
 ## File Structure
@@ -64,9 +85,7 @@ session-reviewer/
 ├── SKILL.md            # Skill instructions for Claude
 ├── export.py           # Python script to generate outputs
 ├── template.html       # HTML template with sidebar UI
-├── session-data.json   # Example session data
-├── session-export.md   # Example Markdown output
-└── session-export.html # Example HTML output
+└── install.sh          # Installation script
 ```
 
 Installed skill location:
@@ -75,6 +94,20 @@ Installed skill location:
 ├── SKILL.md
 ├── export.py
 └── template.html
+```
+
+Exported sessions (in your project repo):
+```
+docs/sessions/              # or sessions/ if no docs/ exists
+├── 2024-01-29-1430/
+│   ├── session.json
+│   ├── session.md
+│   └── session.html
+├── 2024-01-30-auth-refactor/
+│   ├── session.json
+│   ├── session.md
+│   └── session.html
+└── ...
 ```
 
 ## Data Format

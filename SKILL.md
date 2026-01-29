@@ -14,12 +14,34 @@ Export this conversation to both Markdown and HTML formats using a shared JSON d
 
 Base path from arguments: `$ARGUMENTS`
 
-If no path is provided, use `./session-export` as the base name.
+### Default Location (no arguments provided)
 
-This will create:
-- `{base}.json` - Session data (intermediate)
-- `{base}.md` - Markdown version
-- `{base}.html` - HTML version with sidebar navigation
+1. Check if `docs/` directory exists in the current repo
+2. If yes: use `docs/sessions/<timestamp>/`
+3. If no: use `sessions/<timestamp>/`
+
+Timestamp format: `YYYY-MM-DD-HHMM` (e.g., `2024-01-29-1430`)
+
+### With Arguments
+
+If the user provides a path, use it as the session directory name:
+- `/share-session auth-refactor` → `docs/sessions/auth-refactor/` or `sessions/auth-refactor/`
+- `/share-session ./custom/path` → `./custom/path/` (absolute paths bypass the default location logic)
+
+### Files Created
+
+Within the session directory:
+- `session.json` - Session data (intermediate)
+- `session.md` - Markdown version
+- `session.html` - HTML version with sidebar navigation
+
+Example structure:
+```
+docs/sessions/2024-01-29-1430/
+  session.json
+  session.md
+  session.html
+```
 
 ## Step 1: Reconstruct Conversation to JSON
 
@@ -85,19 +107,41 @@ Tell the user:
 ## Example Workflow
 
 ```bash
-# User runs: /share-session ./exports/my-session
+# User runs: /share-session (no arguments, docs/ exists)
 
-# 1. Write JSON
-Write "./exports/my-session.json" with reconstructed conversation
+# 1. Determine output directory
+mkdir -p docs/sessions/2024-01-29-1430
 
-# 2. Run export script
-python3 ~/.claude/skills/share-session/export.py "./exports/my-session.json" "./exports/my-session"
+# 2. Write JSON
+Write "docs/sessions/2024-01-29-1430/session.json" with reconstructed conversation
 
-# 3. Report
+# 3. Run export script
+python3 ~/.claude/skills/share-session/export.py "docs/sessions/2024-01-29-1430/session.json" "docs/sessions/2024-01-29-1430/session"
+
+# 4. Report
 Created:
-- ./exports/my-session.json (session data)
-- ./exports/my-session.md (Markdown)
-- ./exports/my-session.html (HTML with sidebar)
+- docs/sessions/2024-01-29-1430/session.json (session data)
+- docs/sessions/2024-01-29-1430/session.md (Markdown)
+- docs/sessions/2024-01-29-1430/session.html (HTML with sidebar)
+```
+
+```bash
+# User runs: /share-session auth-refactor (named session, no docs/ directory)
+
+# 1. Determine output directory
+mkdir -p sessions/auth-refactor
+
+# 2. Write JSON
+Write "sessions/auth-refactor/session.json" with reconstructed conversation
+
+# 3. Run export script
+python3 ~/.claude/skills/share-session/export.py "sessions/auth-refactor/session.json" "sessions/auth-refactor/session"
+
+# 4. Report
+Created:
+- sessions/auth-refactor/session.json
+- sessions/auth-refactor/session.md
+- sessions/auth-refactor/session.html
 ```
 
 ## Important Notes

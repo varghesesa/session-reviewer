@@ -1,5 +1,6 @@
 # Example exports (not part of the skill)
 exports/
+sessions/
 
 # Python
 __pycache__/
