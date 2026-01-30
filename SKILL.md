@@ -188,12 +188,23 @@ Timeline of exported sessions and plans.
 
 The brief description should be 3-5 words summarizing the session's purpose.
 
-## Step 7: Report Results
+## Step 7: Sync to iCloud
+
+Run the iCloud sync script to backup exports privately:
+
+```bash
+./sync-to-icloud.sh
+```
+
+This syncs the `exports/` directory to `~/Library/Mobile Documents/com~apple~CloudDocs/code-exports/session-reviewer/exports/`.
+
+## Step 8: Report Results
 
 Tell the user:
 - Paths to all created files
 - Number of messages exported
 - Any warnings (truncated content, redacted secrets, incomplete recall)
+- Confirmation that files were synced to iCloud
 
 ## Example Workflow
 
