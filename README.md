@@ -1,14 +1,14 @@
 # Session Reviewer
 
-A Claude Code skill that exports conversations to Markdown and HTML formats for sharing, archiving, or review.
+A Claude Code skill that exports conversations with Claude-generated summaries and implementation plans.
 
 ## Features
 
-- **Dual output**: Generates both Markdown and HTML from a single JSON data source
-- **Self-contained HTML**: Works offline with `file://` protocol (no external dependencies)
-- **Sidebar navigation**: HTML includes searchable message list with filters
-- **Tool visibility**: Shows all tool uses with inputs and outputs
-- **Collapsible sections**: Tool outputs can be expanded/collapsed in HTML view
+- **Claude-generated summaries**: Problem/solution/gotchas format written by Claude
+- **Plan capture**: Saves implementation plans as PLAN.md
+- **Timeline tracking**: CHANGELOG.md tracks when sessions were exported
+- **Self-contained HTML**: Interactive transcript with sidebar navigation
+- **Offline support**: HTML works with `file://` protocol
 
 ## Installation
 
@@ -40,40 +40,91 @@ After installation, restart Claude Code and run:
 /share-session ./custom/path
 ```
 
-### Output Location
+## Output Structure
 
-The skill automatically determines where to save sessions:
+Sessions are organized under an `exports/` directory:
 
-1. If `docs/` directory exists → `docs/sessions/<name>/`
-2. Otherwise → `sessions/<name>/`
-
-Each session gets its own subdirectory containing:
-- `session.json` - Session data (intermediate format)
-- `session.md` - Markdown export
-- `session.html` - HTML export with sidebar UI
-
-Example output structure:
 ```
-docs/sessions/2024-01-29-1430/
-  session.json
-  session.md
-  session.html
+exports/
+├── sessions/
+│   └── 2025-01-30-auth-refactor/
+│       ├── session.json      # Raw session data
+│       ├── session.html      # Interactive transcript view
+│       ├── session.md        # Claude-generated summary
+│       └── PLAN.md           # Implementation plan
+└── CHANGELOG.md              # Timeline of exported sessions
+```
+
+### session.md Format
+
+Claude writes the summary directly with this structure:
+
+```markdown
+# Session Summary: [Session Name]
+
+**Date:** 2025-01-30
+**Working Directory:** /path/to/project
+
+## Problem
+
+What issue was being solved? What was broken or missing?
+
+## Solution
+
+How was it solved? Key decisions made during the session.
+
+## Gotchas
+
+Potential issues identified, edge cases to watch for, things learned.
+
+## Key Files
+
+- `src/auth/token.ts` - Description of changes
+- `src/middleware/auth.ts` - Description of changes
+```
+
+### PLAN.md
+
+Contains the implementation plan discussed during the session. If no formal plan was discussed, notes that the session was exploratory.
+
+### CHANGELOG.md
+
+Timeline of exported sessions (newest first):
+
+```markdown
+# Session Changelog
+
+Timeline of exported sessions and plans.
+
+---
+
+## 2025-01-30 - Auth token refresh planning
+**Session:** [auth-refactor](sessions/auth-refactor/)
+
+## 2025-01-29 - Initial project setup
+**Session:** [initial-setup](sessions/initial-setup/)
 ```
 
 ## How It Works
 
-1. **Location**: Checks for `docs/` directory to determine output path
-2. **Reconstruction**: Claude reconstructs the conversation from memory into structured JSON
-3. **Export**: The `export.py` script converts the JSON to both Markdown and HTML
-4. **Organization**: Each session gets its own subdirectory with all three files
+1. **Location**: Creates `exports/sessions/<name>/` directory
+2. **JSON**: Claude reconstructs the conversation into structured JSON
+3. **Summary**: Claude writes `session.md` with problem/solution/gotchas
+4. **Plan**: Claude writes `PLAN.md` with implementation details
+5. **HTML**: Python script converts JSON to interactive HTML
+6. **Changelog**: New entry prepended to `exports/CHANGELOG.md`
 
 ```
 ┌─────────────────┐     ┌─────────────────────────────────┐
-│ Claude recalls  │ ──▶ │ sessions/2024-01-29-1430/       │
+│ Claude recalls  │ ──▶ │ exports/sessions/auth-refactor/ │
 │ conversation    │     │   session.json                  │
-│                 │     │   session.md                    │
 │                 │     │   session.html                  │
+│ Claude writes   │ ──▶ │   session.md (summary)          │
+│ summary + plan  │     │   PLAN.md (plan)                │
 └─────────────────┘     └─────────────────────────────────┘
+                               │
+                               ▼
+                        exports/CHANGELOG.md (updated)
 ```
 
 ## File Structure
@@ -81,9 +132,8 @@ docs/sessions/2024-01-29-1430/
 ```
 session-reviewer/
 ├── README.md           # This file
-├── PLAN.md             # Original planning document
 ├── SKILL.md            # Skill instructions for Claude
-├── export.py           # Python script to generate outputs
+├── export.py           # Python script (HTML generation only)
 ├── template.html       # HTML template with sidebar UI
 └── install.sh          # Installation script
 ```
@@ -96,23 +146,9 @@ Installed skill location:
 └── template.html
 ```
 
-Exported sessions (in your project repo):
-```
-docs/sessions/              # or sessions/ if no docs/ exists
-├── 2024-01-29-1430/
-│   ├── session.json
-│   ├── session.md
-│   └── session.html
-├── 2024-01-30-auth-refactor/
-│   ├── session.json
-│   ├── session.md
-│   └── session.html
-└── ...
-```
-
 ## Data Format
 
-The JSON structure used by both exports:
+The JSON structure used by HTML generation:
 
 ```json
 {
@@ -147,16 +183,17 @@ The JSON structure used by both exports:
 
 ## Manual Export
 
-You can also run the export script directly:
+You can run the export script directly for HTML generation:
 
 ```bash
-# Generate from existing JSON
+# Generate HTML from existing JSON
 python3 export.py session-data.json output-name
 
 # This creates:
-# - output-name.md
 # - output-name.html
 ```
+
+Note: Markdown generation is now handled by Claude directly, not the Python script.
 
 ## HTML Features
 
@@ -182,7 +219,9 @@ This skill was inspired by the `/share` command in [pi-mono/coding-agent](https:
 The key differences:
 - This skill works with Claude Code (different product)
 - Uses "context reconstruction" approach (Claude recalls the conversation)
-- Outputs both Markdown and HTML
+- Claude generates structured summaries (problem/solution/gotchas)
+- Captures implementation plans as PLAN.md
+- Tracks session timeline via CHANGELOG.md
 - No gist upload (yet) - files are local
 
 ## Future Enhancements
