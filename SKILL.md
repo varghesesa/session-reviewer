@@ -188,15 +188,20 @@ Timeline of exported sessions and plans.
 
 The brief description should be 3-5 words summarizing the session's purpose.
 
-## Step 7: Sync to iCloud
+## Step 7: Sync to iCloud (Optional)
 
-Run the iCloud sync script to backup exports privately:
+If iCloud Drive is available, sync exports for private backup. Auto-detects repo name:
 
 ```bash
-./sync-to-icloud.sh
+REPO_NAME=$(basename "$(pwd)")
+ICLOUD_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/code-exports/$REPO_NAME"
+mkdir -p "$ICLOUD_DIR"
+rsync -av --delete ./exports/ "$ICLOUD_DIR/exports/"
 ```
 
-This syncs the `exports/` directory to `~/Library/Mobile Documents/com~apple~CloudDocs/code-exports/session-reviewer/exports/`.
+This syncs `exports/` to `~/Library/Mobile Documents/com~apple~CloudDocs/code-exports/<repo-name>/exports/`.
+
+Skip this step if iCloud Drive is not available (non-macOS or iCloud not configured).
 
 ## Step 8: Report Results
 
@@ -229,7 +234,12 @@ python3 ~/.claude/skills/share-session/export.py "exports/sessions/auth-refactor
 # 6. Update changelog
 # Read exports/CHANGELOG.md, prepend new entry, write back
 
-# 7. Report
+# 7. Sync to iCloud (if available)
+REPO_NAME=$(basename "$(pwd)")
+ICLOUD_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/code-exports/$REPO_NAME"
+mkdir -p "$ICLOUD_DIR" && rsync -av --delete ./exports/ "$ICLOUD_DIR/exports/"
+
+# 8. Report
 Created:
 - exports/sessions/auth-refactor/session.json (raw data)
 - exports/sessions/auth-refactor/session.html (interactive transcript)
